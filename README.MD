@@ -1,3 +1,7 @@
+# 停止并禁用 firewalld
+systemctl stop firewalld
+systemctl disable firewalld
+
 1,安装  
 install keepalived haproxy psmisc -y  
 2,haproxy配置  
