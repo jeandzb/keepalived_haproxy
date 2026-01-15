@@ -1,6 +1,19 @@
 # 停止并禁用 firewalld
+```shell
 systemctl stop firewalld
 systemctl disable firewalld
+```
+# 内核优化，允许网卡绑定不存在的ip：
+临时生效
+`sysctl -w net.ipv4.ip_nonlocal_bind=1`
+永久生效
+```shell
+echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
+sysctl -p
+```
+查询
+`sysctl net.ipv4.ip_nonlocal_bind`
+
 
 1,安装  
 install keepalived haproxy psmisc -y  
@@ -9,16 +22,24 @@ install keepalived haproxy psmisc -y
 注意：将 <IP address> 替换为 KubeSphere 集群各控制平面节点的私网 IP 地址    
 2.1,重启、开机自启   
 `systemctl restart haproxy`  
-`systemctl enable haproxy`  
-3,haproxy配置  
+`systemctl enable haproxy` 
+热加载配置
+`systemctl reload haproxy`
+
+3,keepalived配置  
 `vi /etc/keepalived/keepalived.conf`  
 将以下参数替换为实际值：  
 <NIC>                  当前负载均衡器的网卡名称。  
 <source IP address>    当前负载均衡器的 IP 地址。  
 <peer IP address>      另一台负载均衡器的 IP 地址。  
 <floating IP address>   用作浮动 IP 地址的虚拟 IP 地址。  
-  
-  
+
+
+ha状态页面
+http://192.168.0.233:8888/stats
+admin/admin
+
+
 ## 问题1，启动服务报错  
 Jan 07 14:25:18 k8s-hap01 haproxy[16058]: [ALERT]    (16058) : config : parsing [/etc/haproxy/haproxy.cfg:4] : 'pidfile' already specified. Continuing.  
 Jan 07 14:25:18 k8s-hap01 haproxy[16058]: [WARNING]  (16058) : config : parsing [/etc/haproxy/haproxy.cfg:28] : backend 'kube-apiserver' : 'option tcplog' directive is ignored in backends.  
@@ -39,3 +60,10 @@ yum install -y policycoreutils-python-utils
 semanage port -a -t http_port_t -p tcp 6443  
 # 如果已经存在，使用 -m 修改  
 semanage port -m -t http_port_t -p tcp 6443  
+
+
+
+
+
+
+
